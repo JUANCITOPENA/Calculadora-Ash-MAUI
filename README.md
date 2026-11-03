@@ -24,6 +24,7 @@ Esta aplicación reproduce fielmente el diseño de cuaderno de la **Calculadora 
 * **Campos de texto (`Entry`)** enmarcados en siluetas vectoriales onduladas/asimétricas tipo festoneado.
 * **4 Botones de operación circulares** con la paleta de colores especificada (+, -, *, /).
 * **Área de resultado** separada por una línea divisoria minimalista.
+* **Motor de cálculo ultra-resiliente** capaz de interpretar números con coma, punto decimal, espacios o notación en culturas hispanas e internacionales.
 
 ---
 
@@ -49,8 +50,9 @@ Copia y pega este código dentro de tu archivo `MainPage.xaml`:
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CalculadoraAsh.MainPage"
-             BackgroundColor="#F4F5F7">
+             x:Class="MauiApp110.MainPage"
+             BackgroundColor="#F4F5F7"
+             Shell.NavBarIsVisible="False">
 
     <ScrollView>
         <VerticalStackLayout Padding="30,40"
@@ -73,11 +75,12 @@ Copia y pega este código dentro de tu archivo `MainPage.xaml`:
             <Grid HeightRequest="56" 
                   HorizontalOptions="Fill">
                 
-                <!-- Trazado vectorial SVG de ondas Bézier -->
+                <!-- Trazado vectorial SVG de ondas Bézier (InputTransparent=True para permitir foco directo) -->
                 <Path Aspect="Fill"
                       Stroke="#E65100"
                       StrokeThickness="2.5"
                       Fill="White"
+                      InputTransparent="True"
                       StrokeLineCap="Round"
                       StrokeLineJoin="Round"
                       Data="M 15,3 
@@ -101,6 +104,7 @@ Copia y pega este código dentro de tu archivo `MainPage.xaml`:
                        PlaceholderColor="#94A3B8"
                        TextColor="#0F172A"
                        Keyboard="Numeric"
+                       BackgroundColor="Transparent"
                        Margin="24,0"
                        VerticalOptions="Center" />
             </Grid>
@@ -109,11 +113,12 @@ Copia y pega este código dentro de tu archivo `MainPage.xaml`:
             <Grid HeightRequest="56" 
                   HorizontalOptions="Fill">
                 
-                <!-- Segundo patrón de ondas -->
+                <!-- Segundo patrón de ondas (InputTransparent=True para permitir foco directo) -->
                 <Path Aspect="Fill"
                       Stroke="#1E3A8A"
                       StrokeThickness="2.5"
                       Fill="White"
+                      InputTransparent="True"
                       StrokeLineCap="Round"
                       StrokeLineJoin="Round"
                       Data="M 18,5 
@@ -137,6 +142,7 @@ Copia y pega este código dentro de tu archivo `MainPage.xaml`:
                        PlaceholderColor="#94A3B8"
                        TextColor="#0F172A"
                        Keyboard="Numeric"
+                       BackgroundColor="Transparent"
                        Margin="24,0"
                        VerticalOptions="Center" />
             </Grid>
@@ -203,7 +209,7 @@ Copia y pega este código dentro de tu archivo `MainPage.xaml`:
 
             <!-- 📏 LÍNEA DIVISORIA VISUAL -->
             <BoxView HeightRequest="2"
-                     Color="#CBD5E1"
+                     Color="#1E293B"
                      Margin="10,12"
                      HorizontalOptions="Fill" />
 
@@ -227,7 +233,9 @@ Copia y pega este código dentro de tu archivo `MainPage.xaml`:
 Copia y pega este código dentro de tu archivo de backend `MainPage.xaml.cs`:
 
 ```csharp
-namespace CalculadoraAsh;
+using System.Globalization;
+
+namespace MauiApp110;
 
 public partial class MainPage : ContentPage
 {
@@ -238,25 +246,49 @@ public partial class MainPage : ContentPage
 
     /// <summary>
     /// Manejador de evento centralizado para todos los botones de operaciones.
-    /// Lee el signo desde CommandParameter y ejecuta el cálculo correspondiente.
+    /// Lee el signo desde CommandParameter y ejecuta el cálculo correspondiente con validación defensiva.
     /// </summary>
-    private void OnOperacionClicked(object sender, EventArgs e)
+    private void OnOperacionClicked(object? sender, EventArgs e)
     {
         // 1. Identificar el botón presionado
         if (sender is not Button btn) return;
         string operacion = btn.CommandParameter?.ToString() ?? string.Empty;
 
-        // 2. Validar que los campos de texto no estén vacíos y contengan números válidos
-        if (!double.TryParse(TxtNum1.Text, out double n1) || 
-            !double.TryParse(TxtNum2.Text, out double n2))
+        // 2. Obtención y validación granular de los textos ingresados
+        string raw1 = TxtNum1.Text ?? string.Empty;
+        string raw2 = TxtNum2.Text ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(raw1))
         {
-            LblResultado.Text = "⚠️ Ingrese números válidos";
+            LblResultado.Text = "⚠️ Ingrese el primer número";
+            TxtNum1.Focus();
             return;
         }
 
-        double resultado = 0;
+        if (string.IsNullOrWhiteSpace(raw2))
+        {
+            LblResultado.Text = "⚠️ Ingrese el segundo número";
+            TxtNum2.Focus();
+            return;
+        }
+
+        if (!TryParseFlexibleNumber(raw1, out double n1))
+        {
+            LblResultado.Text = "⚠️ Primer valor no válido";
+            TxtNum1.Focus();
+            return;
+        }
+
+        if (!TryParseFlexibleNumber(raw2, out double n2))
+        {
+            LblResultado.Text = "⚠️ Segundo valor no válido";
+            TxtNum2.Focus();
+            return;
+        }
 
         // 3. Ejecutar la operación aritmética seleccionada
+        double resultado;
+
         switch (operacion)
         {
             case "+":
@@ -273,17 +305,75 @@ public partial class MainPage : ContentPage
 
             case "/":
                 // Prevención de división por cero
-                if (n2 == 0)
+                if (Math.Abs(n2) < double.Epsilon)
                 {
                     LblResultado.Text = "❌ Error: División por 0";
                     return;
                 }
                 resultado = n1 / n2;
                 break;
+
+            default:
+                LblResultado.Text = "⚠️ Seleccione una operación (+, -, *, /)";
+                return;
         }
 
-        // 4. Mostrar el resultado formateado
-        LblResultado.Text = $"Resultado: {resultado}";
+        // 4. Mostrar el resultado formateado (sin decimales innecesarios)
+        string textoFormateado = (resultado % 1 == 0)
+            ? resultado.ToString("N0", CultureInfo.InvariantCulture).Replace(",", "")
+            : resultado.ToString("G10", CultureInfo.InvariantCulture);
+
+        LblResultado.Text = $"Resultado: {textoFormateado}";
+    }
+
+    /// <summary>
+    /// Parser robusto compatible con InvariantCulture, culturas hispanas, espacios accidentales,
+    /// y separación decimal mediante punto (.) o coma (,).
+    /// </summary>
+    public static bool TryParseFlexibleNumber(string? input, out double value)
+    {
+        value = 0;
+        if (string.IsNullOrWhiteSpace(input)) return false;
+
+        // Limpiar espacios comunes, tabulaciones y caracteres invisibles Unicode (\u00A0, \u200B)
+        string clean = input.Trim()
+            .Replace("\u00A0", "")
+            .Replace("\u200B", "")
+            .Replace(" ", "");
+
+        // Caso con ambos separadores (ej. 1,500.50 o 1.500,50)
+        if (clean.Contains(',') && clean.Contains('.'))
+        {
+            int lastComma = clean.LastIndexOf(',');
+            int lastDot = clean.LastIndexOf('.');
+            if (lastDot > lastComma)
+            {
+                clean = clean.Replace(",", "");
+                return double.TryParse(clean, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+            }
+            else
+            {
+                clean = clean.Replace(".", "").Replace(',', '.');
+                return double.TryParse(clean, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+            }
+        }
+
+        // Caso con coma decimal (ej. 500,5 o 450,25)
+        if (clean.Contains(','))
+        {
+            string withDot = clean.Replace(',', '.');
+            if (double.TryParse(withDot, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+                return true;
+        }
+
+        // Caso con punto decimal o entero estándar
+        if (double.TryParse(clean, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+            return true;
+
+        if (double.TryParse(clean, NumberStyles.Float, CultureInfo.CurrentCulture, out value))
+            return true;
+
+        return false;
     }
 }
 ```
@@ -293,20 +383,18 @@ public partial class MainPage : ContentPage
 ## 💡 ¿Cómo funcionan los bordes ondulados?
 
 1. **Uso de `Grid` como contenedor**: Al colocar un `Path` y un `Entry` dentro de la misma celda de una `Grid`, el `Path` actúa como el fondo visual decorativo mientras que el `Entry` retiene su interacción nativa de teclado y foco.
-2. **Propiedad `Aspect="Fill"`**: Permite que las coordenadas vectoriales de las curvas Bézier (`C`) se ajusten dinámicamente a lo ancho de cualquier dispositivo (Android, iOS o Windows) sin deformar el grosor del contorno.
-3. **Márgenes de seguridad (`Margin="24,0"`)**: El texto introducido dentro del `Entry` no choca con las ondulaciones de los extremos izquierdo y derecho.
+2. **Propiedad `InputTransparent="True"` en el `Path`**: **CRÍTICO:** Evita que el trazado vectorial capture los eventos táctiles o del ratón. De esta manera, el usuario siempre puede tocar en cualquier punto de la caja y darle foco inmediato a la entrada de texto sin bloqueos.
+3. **Propiedad `Aspect="Fill"`**: Permite que las coordenadas vectoriales de las curvas Bézier (`C`) se ajusten dinámicamente a lo ancho de cualquier dispositivo (Android, iOS o Windows) sin deformar el grosor del contorno.
+4. **Márgenes de seguridad (`Margin="24,0"`)**: El texto introducido dentro del `Entry` no choca con las ondulaciones de los extremos izquierdo y derecho.
 
 ---
 
 ## 🚀 Pasos para Ejecutar
 
-1. Crea o abre tu proyecto .NET MAUI:
-   ```bash
-   dotnet new maui -n CalculadoraAsh
-   ```
-2. Reemplaza el contenido de `MainPage.xaml` y `MainPage.xaml.cs` con los bloques mostrados arriba.
-3. Asegúrate de que el `namespace` coincida con el nombre de tu proyecto (`CalculadoraAsh` o `MauiApp110`).
-4. Selecciona tu emulador o dispositivo físico y presiona **F5** o **Run**.
+1. Abre la solución en Visual Studio: `MauiApp110.slnx`
+2. Selecciona el destino de depuración (**Windows Machine** o emulador **Android**).
+3. Presiona **F5** o haz clic en **Run**.
+4. Ingresa los números (por ejemplo `500` y `450`), selecciona cualquier operación (+, -, *, /) y observa el resultado en tiempo real.
 
 ---
 

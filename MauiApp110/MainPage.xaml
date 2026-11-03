@@ -1,10 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiApp110.MainPage"
              BackgroundColor="#F4F5F7"
-             Shell.NavBarIsVisible="False"
-             >
+             Shell.NavBarIsVisible="False">
 
     <ScrollView>
         <VerticalStackLayout Padding="30,40"
@@ -27,11 +26,13 @@
             <!-- PRIMER NÚMERO: Marco ondulado 1 (Estilo naranja / terracota) -->
             <Grid HeightRequest="56" 
                   HorizontalOptions="Fill">
+                
                 <!-- Trazado vectorial con curvas Bézier para simular las ondas -->
                 <Path Aspect="Fill"
                       Stroke="#E65100"
                       StrokeThickness="2.5"
                       Fill="White"
+                      InputTransparent="True"
                       StrokeLineCap="Round"
                       StrokeLineJoin="Round"
                       Data="M 15,3 
@@ -54,6 +55,7 @@
                        PlaceholderColor="#94A3B8"
                        TextColor="#0F172A"
                        Keyboard="Numeric"
+                       BackgroundColor="Transparent"
                        Margin="24,0"
                        VerticalOptions="Center" />
             </Grid>
@@ -61,11 +63,13 @@
             <!-- SEGUNDO NÚMERO: Marco ondulado 2 (Estilo azul marino con ondas alternadas) -->
             <Grid HeightRequest="56" 
                   HorizontalOptions="Fill">
+                
                 <!-- Segundo patrón de ondas para dar variedad visual -->
                 <Path Aspect="Fill"
                       Stroke="#1E3A8A"
                       StrokeThickness="2.5"
                       Fill="White"
+                      InputTransparent="True"
                       StrokeLineCap="Round"
                       StrokeLineJoin="Round"
                       Data="M 18,5 
@@ -88,6 +92,7 @@
                        PlaceholderColor="#94A3B8"
                        TextColor="#0F172A"
                        Keyboard="Numeric"
+                       BackgroundColor="Transparent"
                        Margin="24,0"
                        VerticalOptions="Center" />
             </Grid>
