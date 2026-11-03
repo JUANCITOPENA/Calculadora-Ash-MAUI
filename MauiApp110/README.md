@@ -13,16 +13,29 @@
 
 ---
 
+## 📸 Capturas de Pantalla de la Aplicación
+
+<div align="center">
+  <p><strong>📱 Interfaz Principal — Entradas con Bordes Ondulados y Paleta Pastel</strong></p>
+  <img src="Resources/Images/Screenshot_83.png" alt="Calculadora Ash MAUI - Captura Principal Screenshot 83" width="420" />
+  <br/><br/>
+  <p><strong>📊 Ejecución en Dispositivo — Resultados y Operaciones Matemáticas</strong></p>
+  <img src="Resources/Images/Screenshot_82.png" alt="Calculadora Ash MAUI - Captura Ejecución Screenshot 82" width="420" />
+</div>
+
+---
+
 ## 📌 Tabla de Contenidos
 1. [🌟 Resumen del Proyecto](#-resumen-del-proyecto)
-2. [🎨 Especificaciones Visuales y Paleta](#-especificaciones-visuales-y-paleta)
-3. [📁 Código de la Interfaz: `MainPage.xaml`](#-código-de-la-interfaz-mainpagexaml)
-4. [⚙️ Lógica de Operaciones: `MainPage.xaml.cs`](#-lógica-de-operaciones-mainpagexamlcs)
-5. [💡 ¿Cómo funcionan los bordes ondulados e interacción táctil?](#-cómo-funcionan-los-bordes-ondulados-e-interacción-táctil)
-6. [🛡️ Resiliencia Numérica & Solución de Validación (QA)](#️-resiliencia-numérica--solución-de-validación-qa)
-7. [🧪 Matriz de Pruebas y Certificación de Calidad](#-matriz-de-pruebas-y-certificación-de-calidad)
-8. [🚀 Pasos para Ejecutar](#-pasos-para-ejecutar)
-9. [👨‍💻 Autor & Créditos](#-autor--créditos)
+2. [📸 Capturas de Pantalla](#-capturas-de-pantalla-de-la-aplicación)
+3. [🎨 Especificaciones Visuales y Paleta](#-especificaciones-visuales-y-paleta)
+4. [📁 Código de la Interfaz: `MainPage.xaml`](#-código-de-la-interfaz-mainpagexaml)
+5. [⚙️ Lógica de Operaciones: `MainPage.xaml.cs`](#-lógica-de-operaciones-mainpagexamlcs)
+6. [💡 ¿Cómo funcionan los bordes ondulados e interacción táctil?](#-cómo-funcionan-los-bordes-ondulados-e-interacción-táctil)
+7. [🛡️ Resiliencia Numérica & Solución de Validación (QA)](#️-resiliencia-numérica--solución-de-validación-qa)
+8. [🧪 Matriz de Pruebas y Certificación de Calidad](#-matriz-de-pruebas-y-certificación-de-calidad)
+9. [🚀 Pasos para Ejecutar](#-pasos-para-ejecutar)
+10. [👨‍💻 Autor & Créditos](#-autor--créditos)
 
 ---
 
@@ -446,3 +459,4 @@ public partial class MainPage : ContentPage
 * **Canal Educativo:** [@JuancitoDevV en YouTube](https://www.youtube.com/@JuancitoDevV)
 * **LinkedIn:** [Juancito Peña](https://www.linkedin.com/in/juancitope%C3%B1a/)
 * **Especialidad:** Arquitectura de Software, Cloud, Datos, Inteligencia Artificial & .NET MAUI
+
