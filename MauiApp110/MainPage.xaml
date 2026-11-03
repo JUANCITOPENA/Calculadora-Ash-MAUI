@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiApp110.MainPage"
+             BackgroundColor="#F4F5F7"
+             Shell.NavBarIsVisible="False"
+             >
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30,40"
+                             Spacing="22"
+                             VerticalOptions="Center">
+
+            <!-- Título de la aplicación -->
+            <Label Text="Calculadora Ash MAUI"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   TextColor="#1E293B"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Subtítulo -->
+            <Label Text="Ingrese los números aquí"
+                   FontSize="16"
+                   TextColor="#64748B"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- PRIMER NÚMERO: Marco ondulado 1 (Estilo naranja / terracota) -->
+            <Grid HeightRequest="56" 
+                  HorizontalOptions="Fill">
+                <!-- Trazado vectorial con curvas Bézier para simular las ondas -->
+                <Path Aspect="Fill"
+                      Stroke="#E65100"
+                      StrokeThickness="2.5"
+                      Fill="White"
+                      StrokeLineCap="Round"
+                      StrokeLineJoin="Round"
+                      Data="M 15,3 
+                            C 35,-1 50,7 70,3 
+                            C 90,-1 110,7 130,3 
+                            C 150,-1 170,7 190,3 
+                            C 210,-1 230,7 250,3 
+                            C 270,-1 285,3 295,12 
+                            C 301,22 292,34 297,44 
+                            C 292,52 275,53 250,51 
+                            C 230,55 210,47 190,51 
+                            C 170,55 150,47 130,51 
+                            C 110,55 90,47 70,51 
+                            C 50,55 35,47 15,51 
+                            C 5,51 -1,44 3,34 
+                            C -1,24 5,14 15,3 Z" />
+
+                <Entry x:Name="TxtNum1"
+                       Placeholder="Primer número"
+                       PlaceholderColor="#94A3B8"
+                       TextColor="#0F172A"
+                       Keyboard="Numeric"
+                       Margin="24,0"
+                       VerticalOptions="Center" />
+            </Grid>
+
+            <!-- SEGUNDO NÚMERO: Marco ondulado 2 (Estilo azul marino con ondas alternadas) -->
+            <Grid HeightRequest="56" 
+                  HorizontalOptions="Fill">
+                <!-- Segundo patrón de ondas para dar variedad visual -->
+                <Path Aspect="Fill"
+                      Stroke="#1E3A8A"
+                      StrokeThickness="2.5"
+                      Fill="White"
+                      StrokeLineCap="Round"
+                      StrokeLineJoin="Round"
+                      Data="M 18,5 
+                            C 32,8 48,1 65,6 
+                            C 85,1 105,8 125,4 
+                            C 145,8 165,1 185,6 
+                            C 205,1 225,8 245,4 
+                            C 265,8 280,2 292,10 
+                            C 300,18 294,28 300,38 
+                            C 294,48 282,53 265,50 
+                            C 245,54 225,48 205,53 
+                            C 185,48 165,54 145,50 
+                            C 125,54 105,48 85,53 
+                            C 65,48 45,54 28,49 
+                            C 12,54 2,46 4,36 
+                            C -1,26 6,16 18,5 Z" />
+
+                <Entry x:Name="TxtNum2"
+                       Placeholder="Segundo número"
+                       PlaceholderColor="#94A3B8"
+                       TextColor="#0F172A"
+                       Keyboard="Numeric"
+                       Margin="24,0"
+                       VerticalOptions="Center" />
+            </Grid>
+
+            <!-- Subtítulo de selección -->
+            <Label Text="Seleccione operación:"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   TextColor="#1E293B"
+                   Margin="0,8,0,0" />
+
+            <!-- Fila de Botones Circulares con sus colores respectivos -->
+            <HorizontalStackLayout Spacing="16"
+                                   HorizontalOptions="Center">
+
+                <!-- + : Morado claro -->
+                <Button Text="+"
+                        Clicked="OnOperacionClicked"
+                        CommandParameter="+"
+                        WidthRequest="56"
+                        HeightRequest="56"
+                        CornerRadius="28"
+                        BackgroundColor="#D1C4E9"
+                        TextColor="#311B92"
+                        FontSize="24"
+                        FontAttributes="Bold" />
+
+                <!-- - : Azul claro -->
+                <Button Text="-"
+                        Clicked="OnOperacionClicked"
+                        CommandParameter="-"
+                        WidthRequest="56"
+                        HeightRequest="56"
+                        CornerRadius="28"
+                        BackgroundColor="#BBDEFB"
+                        TextColor="#0D47A1"
+                        FontSize="24"
+                        FontAttributes="Bold" />
+
+                <!-- * : Mamey o amarillo claro -->
+                <Button Text="*"
+                        Clicked="OnOperacionClicked"
+                        CommandParameter="*"
+                        WidthRequest="56"
+                        HeightRequest="56"
+                        CornerRadius="28"
+                        BackgroundColor="#FFE082"
+                        TextColor="#E65100"
+                        FontSize="24"
+                        FontAttributes="Bold" />
+
+                <!-- / : Rosado o verde claro -->
+                <Button Text="/"
+                        Clicked="OnOperacionClicked"
+                        CommandParameter="/"
+                        WidthRequest="56"
+                        HeightRequest="56"
+                        CornerRadius="28"
+                        BackgroundColor="#F8BBD0"
+                        TextColor="#880E4F"
+                        FontSize="22"
+                        FontAttributes="Bold" />
+            </HorizontalStackLayout>
+
+            <!-- Línea de división -->
+            <BoxView HeightRequest="2"
+                     Color="#1E293B"
+                     Margin="10,12"
+                     HorizontalOptions="Fill" />
+
+            <!-- Resultado -->
+            <Label x:Name="LblResultado"
+                   Text="Resultado: 0"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="#0F172A"
+                   HorizontalTextAlignment="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
