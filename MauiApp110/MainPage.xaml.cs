@@ -15,35 +15,11 @@ public partial class MainPage : ContentPage
 
         string operacion = btn.CommandParameter?.ToString() ?? string.Empty;
 
-        // 1. Obtención y validación defensiva de texto
-        string raw1 = TxtNum1.Text ?? string.Empty;
-        string raw2 = TxtNum2.Text ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(raw1))
+        // 1. Validación y obtención de ambos números en un solo paso
+        if (!TryParseFlexibleNumber(TxtNum1.Text, out double n1) || 
+            !TryParseFlexibleNumber(TxtNum2.Text, out double n2))
         {
-            LblResultado.Text = "⚠️ Ingrese el primer número";
-            TxtNum1.Focus();
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(raw2))
-        {
-            LblResultado.Text = "⚠️ Ingrese el segundo número";
-            TxtNum2.Focus();
-            return;
-        }
-
-        if (!TryParseFlexibleNumber(raw1, out double n1))
-        {
-            LblResultado.Text = "⚠️ Primer valor no válido";
-            TxtNum1.Focus();
-            return;
-        }
-
-        if (!TryParseFlexibleNumber(raw2, out double n2))
-        {
-            LblResultado.Text = "⚠️ Segundo valor no válido";
-            TxtNum2.Focus();
+            LblResultado.Text = "⚠️ Ingrese valores válidos";
             return;
         }
 
@@ -65,6 +41,7 @@ public partial class MainPage : ContentPage
                 break;
 
             case "/":
+                // Prevención de división por cero
                 if (Math.Abs(n2) < double.Epsilon)
                 {
                     LblResultado.Text = "❌ Error: División por 0";
@@ -78,7 +55,7 @@ public partial class MainPage : ContentPage
                 return;
         }
 
-        // 3. Formateo estético del resultado
+        // 3. Formateo estético del resultado (sin ceros decimales innecesarios)
         string textoFormateado = (resultado % 1 == 0)
             ? resultado.ToString("N0", CultureInfo.InvariantCulture).Replace(",", "")
             : resultado.ToString("G10", CultureInfo.InvariantCulture);
@@ -108,19 +85,17 @@ public partial class MainPage : ContentPage
             int lastDot = clean.LastIndexOf('.');
             if (lastDot > lastComma)
             {
-                // Formato inglés: coma = miles, punto = decimal
                 clean = clean.Replace(",", "");
                 return double.TryParse(clean, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
             }
             else
             {
-                // Formato europeo/hispano: punto = miles, coma = decimal
                 clean = clean.Replace(".", "").Replace(',', '.');
                 return double.TryParse(clean, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
             }
         }
 
-        // Caso con solo coma (ej. 500,5 o 450,0) -> se interpreta como decimal
+        // Caso con coma decimal (ej. 500,5 o 450,25)
         if (clean.Contains(','))
         {
             string withDot = clean.Replace(',', '.');

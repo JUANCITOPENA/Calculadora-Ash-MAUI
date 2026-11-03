@@ -12,7 +12,7 @@
 [![.NET MAUI](https://img.shields.io/badge/.NET%20MAUI-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/en-us/apps/maui)
 [![C#](https://img.shields.io/badge/C%23-13.0-239120?logo=csharp&logoColor=white)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 [![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20Windows-blue)](https://github.com/JUANCITOPENA/Calculadora-Ash-MAUI)
-[![Version](https://img.shields.io/badge/Version-v1.1.0--PRO-success)](#-versión-y-changelog)
+[![Version](https://img.shields.io/badge/Version-v1.2.0--PRO-success)](#-versión-y-changelog)
 [![Author](https://img.shields.io/badge/Author-Ing.%20Juancito%20Peña-orange?logo=github)](https://github.com/JUANCITOPENA)
 
 > **Proyecto:** Ejercicio 6 - Programación de Dispositivos Móviles  
@@ -28,7 +28,7 @@
 3. [📁 Código de la Interfaz: `MainPage.xaml`](#-código-de-la-interfaz-mainpagexaml)
 4. [⚙️ Lógica de Operaciones: `MainPage.xaml.cs`](#-lógica-de-operaciones-mainpagexamlcs)
 5. [💡 ¿Cómo funcionan los bordes ondulados e interacción táctil?](#-cómo-funcionan-los-bordes-ondulados-e-interacción-táctil)
-6. [🛡️ Resiliencia Numérica & Solución de Validación (QA)](#️-resiliencia-numérica--solución-de-validación-qa)
+6. [🛡️ Validación en Un Solo Paso & Resiliencia Numérica](#️-validación-en-un-solo-paso--resiliencia-numérica)
 7. [🧪 Matriz de Pruebas y Certificación de Calidad](#-matriz-de-pruebas-y-certificación-de-calidad)
 8. [🚀 Pasos para Ejecutar](#-pasos-para-ejecutar)
 9. [👨‍💻 Autor & Créditos](#-autor--créditos)
@@ -42,7 +42,7 @@ Esta aplicación reproduce fielmente el diseño de cuaderno de la **Calculadora 
 * **Campos de texto (`Entry`)** enmarcados en siluetas vectoriales onduladas/asimétricas tipo festoneado mediante curvas Bézier cúbicas (`Path Data`).
 * **4 Botones de operación circulares** con la paleta de colores especificada (+, -, *, /).
 * **Área de resultado** separada por una línea divisoria minimalista de alto contraste.
-* **Motor de cálculo ultra-resiliente** (`TryParseFlexibleNumber`): interpreta correctamente números enteros, decimales con punto o coma, espacios introducidos por teclados predictivos móviles (`\u00A0`), números negativos y previene divisiones por cero.
+* **Validación en un solo paso (`if`)**: extrae, valida y convierte ambos números simultáneamente con el parser `TryParseFlexibleNumber`.
 
 ---
 
@@ -264,7 +264,7 @@ public partial class MainPage : ContentPage
 
     /// <summary>
     /// Manejador de evento centralizado para todos los botones de operaciones.
-    /// Valida de forma defensiva las entradas y ejecuta el cálculo aritmético.
+    /// Valida ambos números en un solo paso y ejecuta el cálculo aritmético.
     /// </summary>
     private void OnOperacionClicked(object? sender, EventArgs e)
     {
@@ -272,35 +272,11 @@ public partial class MainPage : ContentPage
         if (sender is not Button btn) return;
         string operacion = btn.CommandParameter?.ToString() ?? string.Empty;
 
-        // 2. Obtención y validación granular de los textos ingresados
-        string raw1 = TxtNum1.Text ?? string.Empty;
-        string raw2 = TxtNum2.Text ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(raw1))
+        // 2. Validación y obtención de ambos números en UN SOLO PASO
+        if (!TryParseFlexibleNumber(TxtNum1.Text, out double n1) || 
+            !TryParseFlexibleNumber(TxtNum2.Text, out double n2))
         {
-            LblResultado.Text = "⚠️ Ingrese el primer número";
-            TxtNum1.Focus();
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(raw2))
-        {
-            LblResultado.Text = "⚠️ Ingrese el segundo número";
-            TxtNum2.Focus();
-            return;
-        }
-
-        if (!TryParseFlexibleNumber(raw1, out double n1))
-        {
-            LblResultado.Text = "⚠️ Primer valor no válido";
-            TxtNum1.Focus();
-            return;
-        }
-
-        if (!TryParseFlexibleNumber(raw2, out double n2))
-        {
-            LblResultado.Text = "⚠️ Segundo valor no válido";
-            TxtNum2.Focus();
+            LblResultado.Text = "⚠️ Ingrese valores válidos";
             return;
         }
 
@@ -407,18 +383,23 @@ public partial class MainPage : ContentPage
 
 ---
 
-## 🛡️ Resiliencia Numérica & Solución de Validación (QA)
+## 🛡️ Validación en Un Solo Paso & Resiliencia Numérica
 
-### ¿Por qué fallaba con "Valores Inválidos"?
-1. **Foco no transferido al segundo campo**: Debido a que el vector `Path` interceptaba el toque del usuario, al presionar sobre la segunda caja no se activaba el foco ni el teclado, dejando `TxtNum2.Text` vacío.
-2. **Sensibilidad regional y espacios del teclado móvil**: Teclados virtuales como Gboard o Samsung Keyboard frecuentemente agregan espacios de no separación (`\u00A0`) o el usuario ingresa comas en lugar de puntos (`450,00`). El `double.TryParse` simple de C# falla por defecto ante estas discrepancias culturales.
+### Simplificación a un solo bloque `if`:
+```csharp
+if (!TryParseFlexibleNumber(TxtNum1.Text, out double n1) || 
+    !TryParseFlexibleNumber(TxtNum2.Text, out double n2))
+{
+    LblResultado.Text = "⚠️ Ingrese valores válidos";
+    return;
+}
+```
 
-### Solución Definitiva Implementada:
-* `InputTransparent="True"` + `BackgroundColor="Transparent"` en las entradas.
-* El motor `TryParseFlexibleNumber`:
-  * Detecta y limpia cualquier variante de espacio Unicode.
-  * Interpreta comas y puntos decimales automáticamente según el formato detectado.
-  * Brinda retroalimentación exacta indicando si el campo faltante es el primero o el segundo.
+### ¿Por qué este único `if` hace todo el trabajo?
+1. **Comprueba vacíos y nulos**: Si `TxtNum1.Text` o `TxtNum2.Text` están vacíos o nulos, `TryParseFlexibleNumber` detecta `string.IsNullOrWhiteSpace` internamente y retorna `false`.
+2. **Convierte a números (`double`)**: Si el texto es válido, extrae los valores numéricos directamente en las variables `n1` y `n2`.
+3. **Resuelve diferencias de coma y punto**: Acepta `500.5` o `500,5` sin importar el país o teclado del usuario.
+4. **Limpia espacios invisibles**: Teclados móviles suelen añadir espacios al autocompletar; la función los elimina automáticamente.
 
 ---
 
@@ -436,7 +417,7 @@ public partial class MainPage : ContentPage
 | **Punto decimal** | `500.5` | `450.25` | `+` | `950.75` | `Resultado: 950.75` | ✅ **PASS** |
 | **Números Negativos** | `-500` | `450` | `+` | `-50` | `Resultado: -50` | ✅ **PASS** |
 | **División por Cero** | `500` | `0` | `/` | Error Div 0 | `❌ Error: División por 0` | ✅ **PASS** |
-| **Casilla Vacía** | `""` | `450` | `+` | Advertencia | `⚠️ Ingrese el primer número` | ✅ **PASS** |
+| **Casilla Vacía** | `""` | `450` | `+` | Advertencia | `⚠️ Ingrese valores válidos` | ✅ **PASS** |
 
 ---
 
